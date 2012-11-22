@@ -1,0 +1,18 @@
+{
+    "name": "natecj/multiple-aggregate-column-behavior",
+    "description": "",
+    "keywords": [ "propel", "behavior", "multiple-aggregate" ],
+    "authors": [
+        {
+            "name": "Nathan Jacobson"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.4",
+        "propel/propel1": "1.6.*"
+    },
+    "autoload": {
+        "classmap": ["src/"]
+    },
+    "minimum-stability": "dev"
+}
