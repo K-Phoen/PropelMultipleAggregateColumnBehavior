@@ -1,16 +1,22 @@
 
 /**
- * Update the aggregate column in the related <?php echo $relationName ?> object
+ * Update the aggregate columns in the <?php echo $relationName ?> object.
  *
  * @param PropelPDO $con A connection object
  */
 protected function updateRelated<?php echo $relationName ?>(PropelPDO $con)
 {
 	if ($<?php echo $variableName ?> = $this->get<?php echo $relationName ?>()) {
-		$<?php echo $variableName ?>-><?php echo $updateMethodName ?>($con);
+		if (!$<?php echo $variableName ?>->isAlreadyInSave()) {
+			<?php foreach ($updateMethods as $method): ?>
+			$<?php echo $variableName ?>-><?php echo $method ?>($con);
+			<?php endforeach; ?>
+		}
 	}
 	if ($this->old<?php echo $relationName ?>) {
-		$this->old<?php echo $relationName ?>-><?php echo $updateMethodName ?>($con);
+		<?php foreach ($updateMethods as $method): ?>
+		$this->old<?php echo $relationName ?>-><?php echo $method ?>($con);
+		<?php endforeach; ?>
 		$this->old<?php echo $relationName ?> = null;
 	}
 }
