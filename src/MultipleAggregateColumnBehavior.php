@@ -14,12 +14,10 @@ require_once 'MultipleAggregateColumnRelationBehavior.php';
  * Keeps an aggregate column updated with related table
  *
  * @author     Nathan Jacobson
- * @version    $Revision: 1.3 $
- * @package    propel.generator.behavior.multiple_aggregate_column
+ * @author     Kévin Gomez
  */
 class MultipleAggregateColumnBehavior extends Behavior
 {
-
     /**
      * Parameter defaults for this behavior
      *
@@ -27,19 +25,18 @@ class MultipleAggregateColumnBehavior extends Behavior
      * @access protected
      */
     protected $parameters = array(
-        'count'           => 0,
+        'count' => 0,
     );
+
 
     /**
      * Modify the primary table - add aggregate column and aggregate column relation behavior
      *
      * @access public
-     * @return void
      */
     public function modifyTable() {
-
-        // Loop through items
-        for( $x = 1; $x <= intval( $this->getParameter('count') ); $x++ ) {
+        // Loop through aggregates
+        for ($x = 1; $x <= (int) $this->getParameter('count'); $x++) {
 
             $table = $this->getTable();
             if (!$columnName = $this->getParameter('name'.$x)) {
@@ -47,41 +44,42 @@ class MultipleAggregateColumnBehavior extends Behavior
             }
 
             // add the aggregate column if not present
-            if(!$this->getTable()->containsColumn($columnName)) {
+            if (!$this->getTable()->containsColumn($columnName)) {
                 $this->getTable()->addColumn(array(
-                    'name'    => $columnName,
-                    'type'    => 'INTEGER',
+                    'name'  => $columnName,
+                    'type'  => 'INTEGER',
                 ));
             }
 
             // add a behavior in the foreign table to autoupdate the aggregate column
-            $foreignTable = $this->getForeignTable( $x );
-            if (!$foreignTable->hasBehavior('concrete_inheritance_parent')) {
-                if (!$foreignTable->hasBehavior('multiple_aggregate_column_relation')) {
-                    $relationBehavior = new MultipleAggregateColumnRelationBehavior();
-                    $relationBehavior->setName('multiple_aggregate_column_relation');
-                    $foreignTable->addBehavior($relationBehavior);
-                } else {
-                    $relationBehavior = $foreignTable->getBehavior('multiple_aggregate_column_relation');
-                }
-
-                if (!$relationBehavior->getParameter('relations')) {
-                    $relations = array();
-                } else {
-                    $relations = $relationBehavior->getParameter('relations');
-                }
-
-                if (!isset($relations[$table->getName()])) {
-                    $relations[$table->getName()] = array(
-                        'update_methods' => array()
-                    );
-                }
-
-                $relations[$table->getName()]['update_methods'][] = 'update' . $this->getColumn($x)->getPhpName();
-
-                $relationBehavior->addParameter(array('name' => 'relations', 'value' => $relations));
+            $foreignTable = $this->getForeignTable($x);
+            if ($foreignTable->hasBehavior('concrete_inheritance_parent')) {
+                return;
             }
 
+            if (!$foreignTable->hasBehavior('multiple_aggregate_column_relation')) {
+                $relationBehavior = new MultipleAggregateColumnRelationBehavior();
+                $relationBehavior->setName('multiple_aggregate_column_relation');
+                $foreignTable->addBehavior($relationBehavior);
+            } else {
+                $relationBehavior = $foreignTable->getBehavior('multiple_aggregate_column_relation');
+            }
+
+            if (!$relationBehavior->getParameter('relations')) {
+                $relations = array();
+            } else {
+                $relations = $relationBehavior->getParameter('relations');
+            }
+
+            if (!isset($relations[$table->getName()])) {
+                $relations[$table->getName()] = array(
+                    'update_methods' => array()
+                );
+            }
+
+            $relations[$table->getName()]['update_methods'][] = 'update' . $this->getColumn($x)->getPhpName();
+
+            $relationBehavior->addParameter(array('name' => 'relations', 'value' => $relations));
         } // end for loop
     }
 
@@ -90,21 +88,18 @@ class MultipleAggregateColumnBehavior extends Behavior
      *
      * @access public
      * @param mixed $builder
-     * @return void
      */
-    public function objectMethods( $builder ) {
-
+    public function objectMethods($builder) {
         $script = '';
 
         // Loop through items
-        for( $x = 1; $x <= intval( $this->getParameter('count') ); $x++ ) {
-
+        for($x = 1; $x <= (int) $this->getParameter('count'); $x++) {
             if (!$this->getParameter('foreign_table'.$x)) {
                 throw new InvalidArgumentException(sprintf('You must define a \'foreign_table$x\' parameter for the \'aggregate_column\' behavior in the \'%s\' table', $this->getTable()->getName(), $builder));
             }
-            $script .= $this->addObjectCompute( $x );
-            $script .= $this->addObjectUpdate( $x );
 
+            $script .= $this->addObjectCompute($x);
+            $script .= $this->addObjectUpdate($x);
         } // end for loop
 
         return $script;
@@ -116,24 +111,23 @@ class MultipleAggregateColumnBehavior extends Behavior
      *
      * @access protected
      * @param mixed $x index of the template
-     * @return void
      */
-    protected function addObjectCompute( $x ) {
-
-        // Build the where conditions and bindings
+    protected function addObjectCompute($x) {
         $conditions = array();
         $bindings = array();
-        foreach ($this->getForeignKey( $x )->getColumnObjectsMapping() as $index => $columnReference) {
+
+        // Build the where conditions and bindings
+        foreach ($this->getForeignKey($x)->getColumnObjectsMapping() as $index => $columnReference) {
             $conditions[] = $columnReference['local']->getFullyQualifiedName() . ' = :p' . ($index + 1);
-            $bindings[$index + 1]   = $columnReference['foreign']->getPhpName();
+            $bindings[$index + 1] = $columnReference['foreign']->getPhpName();
         }
 
         // Add soft_delete condition to foreign table if that behavior is used
-        if ( $this->getForeignTable( $x )->hasBehavior('soft_delete') )
-            $conditions[] = $this->getParameter('foreign_table'.$x).".DELETED_AT IS NULL";
+        if ($this->getForeignTable($x)->hasBehavior('soft_delete'))
+            $conditions[] = $this->getParameter('foreign_table' . $x) . '.DELETED_AT IS NULL';
 
-        if ($this->getParameter('condition'.$x)) {
-            $conditions[] = $this->getParameter('condition'.$x);
+        if ($this->getParameter('condition' . $x)) {
+            $conditions[] = $this->getParameter('condition' . $x);
         }
 
         // Determine the table to query
@@ -153,11 +147,10 @@ class MultipleAggregateColumnBehavior extends Behavior
 
         // Return the objectCompute partial template
         return $this->renderTemplate('objectCompute', array(
-            'column'   => $this->getColumn( $x ),
+            'column'   => $this->getColumn($x),
             'sql'      => $sql,
             'bindings' => $bindings,
         ));
-
     }
 
     /**
@@ -165,11 +158,10 @@ class MultipleAggregateColumnBehavior extends Behavior
      *
      * @access protected
      * @param mixed $x index of the template
-     * @return void
      */
-    protected function addObjectUpdate( $x ) {
+    protected function addObjectUpdate($x) {
         return $this->renderTemplate('objectUpdate', array(
-            'column'  => $this->getColumn( $x ),
+            'column' => $this->getColumn($x),
         ));
     }
 
@@ -178,17 +170,16 @@ class MultipleAggregateColumnBehavior extends Behavior
      *
      * @access protected
      * @param mixed $x index of the foreign table
-     * @return void
      */
-    protected function getForeignTable( $x ) {
-
+    protected function getForeignTable($x) {
         $database = $this->getTable()->getDatabase();
         $tableName = $database->getTablePrefix() . $this->getParameter('foreign_table'.$x);
+
         if ($database->getPlatform()->supportsSchemas() && $this->getParameter('foreign_schema'.$x)) {
             $tableName = $this->getParameter('foreign_schema'.$x). '.' . $tableName;
         }
-        return $database->getTable($tableName);
 
+        return $database->getTable($tableName);
     }
 
     /**
@@ -196,19 +187,17 @@ class MultipleAggregateColumnBehavior extends Behavior
      *
      * @access protected
      * @param mixed $x index of the foreign key
-     * @return void
      */
-    protected function getForeignKey( $x ) {
-
-        $foreignTable = $this->getForeignTable( $x );
+    protected function getForeignKey($x) {
+        $foreignTable = $this->getForeignTable($x);
         // let's infer the relation from the foreign table
         $fks = $foreignTable->getForeignKeysReferencingTable($this->getTable()->getName());
         if (!$fks) {
             throw new InvalidArgumentException(sprintf('You must define a foreign key to the \'%s\' table in the \'%s\' table to enable the \'aggregate_column\' behavior', $this->getTable()->getName(), $foreignTable->getName()));
         }
+
         // FIXME doesn't work when more than one fk to the same table
         return array_shift($fks);
-
     }
 
     /**
@@ -216,10 +205,8 @@ class MultipleAggregateColumnBehavior extends Behavior
      *
      * @access protected
      * @param mixed $x index of the column
-     * @return void
      */
     protected function getColumn( $x ) {
         return $this->getTable()->getColumn($this->getParameter('name'.$x));
     }
-
 }

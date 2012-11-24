@@ -14,8 +14,7 @@ require_once 'MultipleAggregateColumnRelationBehavior.php';
  * Keeps an aggregate column updated with related table
  *
  * @author     François Zaninotto
- * @version    $Revision: 1785 $
- * @package    propel.generator.behavior.aggregate_column
+ * @author     Kévin Gomez
  */
 class MultipleAggregateColumnRelationBehavior extends Behavior
 {
@@ -176,8 +175,8 @@ class MultipleAggregateColumnRelationBehavior extends Behavior
             $relationName = $this->getRelationName($builder, $foreign_table);
 
             $script .= $this->renderTemplate('queryUpdateRelated', array(
-                'relationName'     => $relationName,
-                'variableName'     => self::lcfirst($relationName),
+                'relationName'      => $relationName,
+                'variableName'      => self::lcfirst($relationName),
                 'updateMethodNames' => $relation['update_methods'],
             ));
         }
