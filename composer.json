@@ -1,10 +1,14 @@
 {
-    "name": "natecj/multiple-aggregate-column-behavior",
-    "description": "",
+    "name": "kphoen/multiple-aggregate-column-behavior",
+    "description": "Propel Behavior that allows multiple aggregate columns on a single table",
     "keywords": [ "propel", "behavior", "multiple-aggregate" ],
     "authors": [
         {
             "name": "Nathan Jacobson"
+        },
+        {
+            "name": "Kévin Gomez",
+            "email": "contact@kevingomez.fr"
         }
     ],
     "require": {
