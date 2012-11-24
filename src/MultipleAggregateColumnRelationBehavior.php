@@ -18,11 +18,11 @@ require_once 'MultipleAggregateColumnRelationBehavior.php';
  */
 class MultipleAggregateColumnRelationBehavior extends Behavior
 {
-
     // default parameters value
     protected $parameters = array(
         'relations' => array(),
     );
+
 
     public function postSave($builder)
     {
