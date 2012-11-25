@@ -152,14 +152,16 @@ class MultipleAggregateColumnRelationBehavior extends Behavior
         $script = '';
 
         foreach ($this->getParameter('relations') as $foreign_table => $relation) {
-            $relationName = $this->getRelationName($builder, $foreign_table);
             $foreignKey = $this->getForeignKey($foreign_table);
+            $foreignQueryBuilder = $builder->getNewStubQueryBuilder($foreignKey->getForeignTable());
+            $builder->declareClass($foreignQueryBuilder->getFullyQualifiedClassname());
+            $relationName = $this->getRelationName($builder, $foreign_table);
 
             $script .= $this->renderTemplate('queryFindRelated', array(
                 'foreignTable'     => $this->getForeignTable($foreign_table),
                 'relationName'     => $relationName,
                 'variableName'     => self::lcfirst($relationName),
-                'foreignQueryName' => $foreignKey->getForeignTable($foreign_table)->getPhpName() . 'Query',
+                'foreignQueryName' => $foreignQueryBuilder->getClassname(),
                 'refRelationName'  => $builder->getRefFKPhpNameAffix($foreignKey),
             ));
         }
