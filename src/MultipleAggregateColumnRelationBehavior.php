@@ -8,7 +8,6 @@
  * @license    MIT License
  */
 
-require_once 'MultipleAggregateColumnRelationBehavior.php';
 
 /**
  * Keeps an aggregate column updated with related table
@@ -83,7 +82,7 @@ class MultipleAggregateColumnRelationBehavior extends Behavior
             $search = "	public function set{$relationName}({$relatedClass} \$v = null)
         {";
             $replace = $search . "
-            // aggregate_column_relation behavior
+            // multiple_aggregate_column_relation behavior
             if (null !== \$this->a{$relationName} && \$v !== \$this->a{$relationName}) {
                 \$this->old{$relationName} = \$this->a{$relationName};
             }";

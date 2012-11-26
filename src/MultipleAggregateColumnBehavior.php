@@ -22,7 +22,6 @@ class MultipleAggregateColumnBehavior extends Behavior
      * Parameter defaults for this behavior
      *
      * @var mixed
-     * @access protected
      */
     protected $parameters = array(
         'count' => 0,
@@ -31,8 +30,6 @@ class MultipleAggregateColumnBehavior extends Behavior
 
     /**
      * Modify the primary table - add aggregate column and aggregate column relation behavior
-     *
-     * @access public
      */
     public function modifyTable() {
         // Loop through aggregates
@@ -86,7 +83,6 @@ class MultipleAggregateColumnBehavior extends Behavior
     /**
      * Add the object methods using templates.
      *
-     * @access public
      * @param mixed $builder
      */
     public function objectMethods($builder) {
@@ -109,35 +105,38 @@ class MultipleAggregateColumnBehavior extends Behavior
     /**
      * Build the objectCompute partial template.
      *
-     * @access protected
      * @param mixed $x index of the template
      */
     protected function addObjectCompute($x) {
         $conditions = array();
         $bindings = array();
 
-        // Build the where conditions and bindings
+        // schema defined condition
+        if ($this->getParameter('condition' . $x)) {
+            $conditions[] = $this->getParameter('condition' . $x);
+        }
+
+        // build the where conditions and bindings
         foreach ($this->getForeignKey($x)->getColumnObjectsMapping() as $index => $columnReference) {
             $conditions[] = $columnReference['local']->getFullyQualifiedName() . ' = :p' . ($index + 1);
             $bindings[$index + 1] = $columnReference['foreign']->getPhpName();
         }
 
-        // Add soft_delete condition to foreign table if that behavior is used
-        if ($this->getForeignTable($x)->hasBehavior('soft_delete'))
+        // add soft_delete condition to foreign table if that behavior is used
+        // @todo: because of this condition, soft deleted objects won't be
+        // considered. is that what we want?
+        if ($this->getForeignTable($x)->hasBehavior('soft_delete')) {
             $conditions[] = $this->getParameter('foreign_table' . $x) . '.DELETED_AT IS NULL';
-
-        if ($this->getParameter('condition' . $x)) {
-            $conditions[] = $this->getParameter('condition' . $x);
         }
 
-        // Determine the table to query
+        // determine the table to query
         $database = $this->getTable()->getDatabase();
         $tableName = $database->getTablePrefix() . $this->getParameter('foreign_table'.$x);
         if ($database->getPlatform()->supportsSchemas() && $this->getParameter('foreign_schema'.$x)) {
             $tableName = $this->getParameter('foreign_schema'.$x).'.'.$tableName;
         }
 
-        // Build the actual SQL query
+        // build the actual SQL query
         $sql = sprintf(
             'SELECT %s FROM %s WHERE %s',
             $this->getParameter('expression'.$x),
@@ -145,7 +144,6 @@ class MultipleAggregateColumnBehavior extends Behavior
             implode(' AND ', $conditions)
         );
 
-        // Return the objectCompute partial template
         return $this->renderTemplate('objectCompute', array(
             'column'   => $this->getColumn($x),
             'sql'      => $sql,
@@ -156,7 +154,6 @@ class MultipleAggregateColumnBehavior extends Behavior
     /**
      * Build the objectUpdate partial template.
      *
-     * @access protected
      * @param mixed $x index of the template
      */
     protected function addObjectUpdate($x) {
@@ -168,7 +165,6 @@ class MultipleAggregateColumnBehavior extends Behavior
     /**
      * Get the foreign table by index.
      *
-     * @access protected
      * @param mixed $x index of the foreign table
      */
     protected function getForeignTable($x) {
@@ -185,7 +181,6 @@ class MultipleAggregateColumnBehavior extends Behavior
     /**
      * Get the foreign key by index.
      *
-     * @access protected
      * @param mixed $x index of the foreign key
      */
     protected function getForeignKey($x) {
@@ -203,10 +198,9 @@ class MultipleAggregateColumnBehavior extends Behavior
     /**
      * Get the column by index.
      *
-     * @access protected
      * @param mixed $x index of the column
      */
-    protected function getColumn( $x ) {
+    protected function getColumn($x) {
         return $this->getTable()->getColumn($this->getParameter('name'.$x));
     }
 }
