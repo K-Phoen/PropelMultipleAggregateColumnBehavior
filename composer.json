@@ -1,7 +1,7 @@
 {
-    "name": "kphoen/multiple-aggregate-column-behavior",
+    "name": "kphoen/propel-multiple-aggregate-column-behavior",
     "description": "Propel Behavior that allows multiple aggregate columns on a single table",
-    "keywords": [ "propel", "behavior", "multiple-aggregate" ],
+    "keywords": [ "propel", "behavior", "multiple-aggregate", "aggregate" ],
     "authors": [
         {
             "name": "Nathan Jacobson"
@@ -13,7 +13,7 @@
     ],
     "require": {
         "php": ">=5.2.4",
-        "propel/propel1": "1.6.*"
+        "propel/propel1": ">=1.6.0"
     },
     "autoload": {
         "classmap": ["src/"]

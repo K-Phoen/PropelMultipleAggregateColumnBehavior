@@ -79,16 +79,16 @@ class MultipleAggregateColumnRelationBehavior extends Behavior
             $relationName = $this->getRelationName($builder, $foreign_table);
             $relatedClass = $this->getForeignTable($foreign_table)->getPhpName();
 
-            $search = "	public function set{$relationName}({$relatedClass} \$v = null)
-        {";
+            $search = "public function set{$relationName}({$relatedClass} \$v = null)
+    {";
             $replace = $search . "
-            // multiple_aggregate_column_relation behavior
-            if (null !== \$this->a{$relationName} && \$v !== \$this->a{$relationName}) {
-                \$this->old{$relationName} = \$this->a{$relationName};
-            }";
+        // multiple_aggregate_column_relation behavior
+        if (null !== \$this->a{$relationName} && \$v !== \$this->a{$relationName}) {
+            \$this->old{$relationName} = \$this->a{$relationName};
+        }
+";
             $script = str_replace($search, $replace, $script);
         }
-
     }
 
     public function preUpdateQuery($builder)
