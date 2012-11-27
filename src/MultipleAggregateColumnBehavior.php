@@ -160,13 +160,6 @@ class MultipleAggregateColumnBehavior extends Behavior
             $bindings[$index + 1] = $columnReference['foreign']->getPhpName();
         }
 
-        // add soft_delete condition to foreign table if that behavior is used
-        // @todo: because of this condition, soft deleted objects won't be
-        // considered. is that what we want?
-        if ($this->getForeignTable($x)->hasBehavior('soft_delete')) {
-            $conditions[] = $this->getParameter('foreign_table' . $x) . '.DELETED_AT IS NULL';
-        }
-
         // determine the table to query
         $database = $this->getTable()->getDatabase();
         $tableName = $database->getTablePrefix() . $this->getAggregateParameter('foreign_table', $x);
