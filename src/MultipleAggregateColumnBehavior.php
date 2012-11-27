@@ -24,8 +24,27 @@ class MultipleAggregateColumnBehavior extends Behavior
      * @var mixed
      */
     protected $parameters = array(
-        'count' => 0,
+        'count' => null,
     );
+
+    protected function getNbAggregates()
+    {
+        // no 'count' parameter given, assume there is one aggregate
+        if ($this->getParameter('count') === null) {
+            return 1;
+        }
+
+        return (int) $this->getParameter('count');
+    }
+
+    protected function getAggregateParameter($name, $aggregate)
+    {
+        if ($this->getParameter('count') === null) {
+            return $this->getParameter($name);
+        }
+
+        return $this->getParameter($name.$aggregate);
+    }
 
 
     /**
@@ -33,10 +52,10 @@ class MultipleAggregateColumnBehavior extends Behavior
      */
     public function modifyTable() {
         // Loop through aggregates
-        for ($x = 1; $x <= (int) $this->getParameter('count'); $x++) {
+        for ($x = 1; $x <= $this->getNbAggregates(); $x++) {
 
             $table = $this->getTable();
-            if (!$columnName = $this->getParameter('name'.$x)) {
+            if (!$columnName = $this->getAggregateParameter('name', $x)) {
                 throw new InvalidArgumentException(sprintf('You must define a \'name$x\' parameter for the \'aggregate_column\' behavior in the \'%s\' table', $table->getName()));
             }
 
@@ -89,8 +108,8 @@ class MultipleAggregateColumnBehavior extends Behavior
         $script = '';
 
         // Loop through items
-        for($x = 1; $x <= (int) $this->getParameter('count'); $x++) {
-            if (!$this->getParameter('foreign_table'.$x)) {
+        for($x = 1; $x <= $this->getNbAggregates(); $x++) {
+            if (!$this->getAggregateParameter('foreign_table', $x)) {
                 throw new InvalidArgumentException(sprintf('You must define a \'foreign_table$x\' parameter for the \'aggregate_column\' behavior in the \'%s\' table', $this->getTable()->getName(), $builder));
             }
 
@@ -112,8 +131,8 @@ class MultipleAggregateColumnBehavior extends Behavior
         $bindings = array();
 
         // schema defined condition
-        if ($this->getParameter('condition' . $x)) {
-            $conditions[] = $this->getParameter('condition' . $x);
+        if ($this->getAggregateParameter('condition', $x)) {
+            $conditions[] = $this->getAggregateParameter('condition', $x);
         }
 
         // build the where conditions and bindings
@@ -131,15 +150,15 @@ class MultipleAggregateColumnBehavior extends Behavior
 
         // determine the table to query
         $database = $this->getTable()->getDatabase();
-        $tableName = $database->getTablePrefix() . $this->getParameter('foreign_table'.$x);
-        if ($database->getPlatform()->supportsSchemas() && $this->getParameter('foreign_schema'.$x)) {
-            $tableName = $this->getParameter('foreign_schema'.$x).'.'.$tableName;
+        $tableName = $database->getTablePrefix() . $this->getAggregateParameter('foreign_table', $x);
+        if ($database->getPlatform()->supportsSchemas() && $this->getAggregateParameter('foreign_schema', $x)) {
+            $tableName = $this->getAggregateParameter('foreign_schema', $x).'.'.$tableName;
         }
 
         // build the actual SQL query
         $sql = sprintf(
             'SELECT %s FROM %s WHERE %s',
-            $this->getParameter('expression'.$x),
+            $this->getAggregateParameter('expression', $x),
             $database->getPlatform()->quoteIdentifier($tableName),
             implode(' AND ', $conditions)
         );
@@ -169,10 +188,10 @@ class MultipleAggregateColumnBehavior extends Behavior
      */
     protected function getForeignTable($x) {
         $database = $this->getTable()->getDatabase();
-        $tableName = $database->getTablePrefix() . $this->getParameter('foreign_table'.$x);
+        $tableName = $database->getTablePrefix() . $this->getAggregateParameter('foreign_table', $x);
 
-        if ($database->getPlatform()->supportsSchemas() && $this->getParameter('foreign_schema'.$x)) {
-            $tableName = $this->getParameter('foreign_schema'.$x). '.' . $tableName;
+        if ($database->getPlatform()->supportsSchemas() && $this->getAggregateParameter('foreign_schema', $x)) {
+            $tableName = $this->getAggregateParameter('foreign_schema', $x). '.' . $tableName;
         }
 
         return $database->getTable($tableName);
@@ -201,6 +220,6 @@ class MultipleAggregateColumnBehavior extends Behavior
      * @param mixed $x index of the column
      */
     protected function getColumn($x) {
-        return $this->getTable()->getColumn($this->getParameter('name'.$x));
+        return $this->getTable()->getColumn($this->getAggregateParameter('name', $x));
     }
 }
