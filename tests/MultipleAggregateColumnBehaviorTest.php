@@ -38,7 +38,6 @@ class MultipleAggregateColumnBehaviorTest extends \PHPUnit_Framework_TestCase
         // and we don't want to call PropelPDO::commit() in that case
         // since it will trigger an exception on its own
         // ('Cannot commit because a nested transaction was rolled back')
-        return;
         if ($this->con->isCommitable()) {
             $this->con->commit();
         }
@@ -170,17 +169,22 @@ class MultipleAggregateColumnBehaviorTest extends \PHPUnit_Framework_TestCase
     {
         AggregateCommentQuery::create()->deleteAll($this->con);
         AggregatePostQuery::create()->deleteAll($this->con);
+
         $post = new AggregatePost();
         $post->save($this->con);
+
         $comment1 = new AggregateComment();
         $comment1->setAggregatePost($post);
         $comment1->save($this->con);
+
         $comment2 = new AggregateComment();
         $comment2->setAggregatePost($post);
         $comment2->save($this->con);
         $this->assertEquals(2, $post->getNbComments());
+
         $comment2->setAggregatePost(null);
         $comment2->save($this->con);
+
         $this->assertEquals(1, $post->getNbComments(), 'Removing a relation changes the related object aggregate column');
     }
 

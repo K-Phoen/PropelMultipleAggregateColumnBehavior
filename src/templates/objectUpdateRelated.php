@@ -8,7 +8,7 @@ protected function updateRelated<?php echo $relationName ?>(PropelPDO $con)
 {
 	if ($<?php echo $variableName ?> = $this->get<?php echo $relationName ?>()) {
 		<?php foreach ($updateMethods as $method): ?>
- 		if (!$<?php echo $variableName ?>->isAlreadyInSave()) {
+		if (!$<?php echo $variableName ?>->isAlreadyInSave()) {
 			$<?php echo $variableName ?>-><?php echo $method ?>($con);
 		}
 		<?php endforeach; ?>
