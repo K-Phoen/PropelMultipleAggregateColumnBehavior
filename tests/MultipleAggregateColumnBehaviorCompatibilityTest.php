@@ -6,40 +6,34 @@
  *
  * @author Kévin Gomez <contact@kevingomez.fr>
  */
-class MultipleAggregateColumnBehaviorTest extends \PHPUnit_Framework_TestCase
+class MultipleAggregateColumnBehaviorTest extends MultipleAggregateColumnBehaviorBaseTest
 {
-    protected $con;
-
-
-    protected function setUp()
+    protected function getSchema()
     {
-        parent::setUp();
-
-        if (!class_exists('AggregatePost')) {
-            $builder = new PropelQuickBuilder();
-            $config = $builder->getConfig();
-            $builder->setConfig($config);
-            $builder->setSchema($this->getSchema('posts'));
-
-            $builder->build();
-        }
-
-        $this->con = Propel::getConnection(AggregatePostPeer::DATABASE_NAME);
-        $this->con->beginTransaction();
+        return file_get_contents(dirname(__FILE__) . '/fixtures/posts-compatibility-schema.xml');
     }
 
-    protected function tearDown()
+    protected function getConnection()
     {
-        parent::tearDown();
+        return Propel::getConnection(AggregatePostPeer::DATABASE_NAME);
+    }
 
-        // Only commit if the transaction hasn't failed.
-        // This is because tearDown() is also executed on a failed tests,
-        // and we don't want to call PropelPDO::commit() in that case
-        // since it will trigger an exception on its own
-        // ('Cannot commit because a nested transaction was rolled back')
-        if ($this->con->isCommitable()) {
-            $this->con->commit();
-        }
+    protected function populatePoll()
+    {
+        AggregateItemQuery::create()->deleteAll($this->con);
+        AggregatePollQuery::create()->deleteAll($this->con);
+        $poll = new AggregatePoll();
+        $poll->save($this->con);
+        $item1 = new AggregateItem();
+        $item1->setScore(12);
+        $item1->setAggregatePoll($poll);
+        $item1->save($this->con);
+        $item2 = new AggregateItem();
+        $item2->setScore(7);
+        $item2->setAggregatePoll($poll);
+        $item2->save($this->con);
+
+        return array($poll, $item1, $item2);
     }
 
 
@@ -271,29 +265,5 @@ class MultipleAggregateColumnBehaviorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(5, $post1->getNbComments(), 'the post has 5 comments');
         $this->assertEquals(1, $post1->countComputeCall, 'Only one call to count nbComment');
-    }
-
-
-    protected function populatePoll()
-    {
-        AggregateItemQuery::create()->deleteAll($this->con);
-        AggregatePollQuery::create()->deleteAll($this->con);
-        $poll = new AggregatePoll();
-        $poll->save($this->con);
-        $item1 = new AggregateItem();
-        $item1->setScore(12);
-        $item1->setAggregatePoll($poll);
-        $item1->save($this->con);
-        $item2 = new AggregateItem();
-        $item2->setScore(7);
-        $item2->setAggregatePoll($poll);
-        $item2->save($this->con);
-
-        return array($poll, $item1, $item2);
-    }
-
-    protected function getSchema($name)
-    {
-        return file_get_contents(dirname(__FILE__) . '/fixtures/' . $name . '-schema.xml');
     }
 }
