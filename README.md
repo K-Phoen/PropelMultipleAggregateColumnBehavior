@@ -1,7 +1,12 @@
 PropelMultipleAggregateColumnBehavior
 ===================
 
-This behavior is an almost exact copy of the bundled aggregate_column behavior, with the addition of allowing multiple aggregate columns on a single table - something not possible with the existing behavior.
+This behavior is an almost exact copy of the bundled aggregate_column behavior,
+with the addition of allowing multiple aggregate columns on a single table -
+something not possible with the existing behavior.
+
+This behaviors aims to be **fully compatible** with the original aggregate_column
+behavior.
 
 For anyone reading this who wants some basic info on usage, here is the schema I am currently using:
 
