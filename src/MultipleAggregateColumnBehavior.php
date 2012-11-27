@@ -107,19 +107,38 @@ class MultipleAggregateColumnBehavior extends Behavior
     public function objectMethods($builder) {
         $script = '';
 
-        // Loop through items
-        for($x = 1; $x <= $this->getNbAggregates(); $x++) {
+        // loop through aggregates
+        for ($x = 1; $x <= $this->getNbAggregates(); $x++) {
             if (!$this->getAggregateParameter('foreign_table', $x)) {
                 throw new InvalidArgumentException(sprintf('You must define a \'foreign_table$x\' parameter for the \'aggregate_column\' behavior in the \'%s\' table', $this->getTable()->getName(), $builder));
             }
 
             $script .= $this->addObjectCompute($x);
             $script .= $this->addObjectUpdate($x);
-        } // end for loop
+        }
 
         return $script;
     }
 
+
+    public function postSave($builder)
+    {
+        $script = '';
+
+        // loop through aggregates
+        for ($x = 1; $x <= $this->getNbAggregates(); $x++) {
+            if (!$this->getAggregateParameter('foreign_table', $x)) {
+                throw new InvalidArgumentException(sprintf('You must define a \'foreign_table$x\' parameter for the \'aggregate_column\' behavior in the \'%s\' table', $this->getTable()->getName(), $builder));
+            }
+
+            $script .= $this->renderTemplate('objectPostSave', array(
+                'column'     => $this->getColumn($x),
+                'columnRefk' => $builder->getRefFKCollVarName($this->getForeignKey($x))
+            ));
+        }
+
+        return $script;
+    }
 
     /**
      * Build the objectCompute partial template.
