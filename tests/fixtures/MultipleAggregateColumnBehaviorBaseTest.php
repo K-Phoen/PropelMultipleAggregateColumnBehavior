@@ -24,7 +24,6 @@ abstract class MultipleAggregateColumnBehaviorBaseTest extends \PHPUnit_Framewor
         }
 
         $this->con = $this->getConnection();
-        $this->con->beginTransaction();
     }
 
     protected function buildSchema($schema)
@@ -35,19 +34,5 @@ abstract class MultipleAggregateColumnBehaviorBaseTest extends \PHPUnit_Framewor
         $builder->setSchema($schema);
 
         $builder->build();
-    }
-
-    protected function tearDown()
-    {
-        parent::tearDown();
-
-        // Only commit if the transaction hasn't failed.
-        // This is because tearDown() is also executed on a failed tests,
-        // and we don't want to call PropelPDO::commit() in that case
-        // since it will trigger an exception on its own
-        // ('Cannot commit because a nested transaction was rolled back')
-        if ($this->con->isCommitable()) {
-            $this->con->commit();
-        }
     }
 }
