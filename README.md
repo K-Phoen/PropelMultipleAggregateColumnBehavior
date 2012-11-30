@@ -1,6 +1,8 @@
 PropelMultipleAggregateColumnBehavior
 ===================
 
+[![Build Status](https://secure.travis-ci.org/K-Phoen/PropelMultipleAggregateColumnBehavior.png?branch=master)](https://travis-ci.org/K-Phoen/PropelMultipleAggregateColumnBehavior)
+
 This behavior is an almost exact copy of the bundled aggregate_column behavior,
 with the addition of allowing multiple aggregate columns on a single table -
 something not possible with the existing behavior.
