@@ -12,6 +12,7 @@ abstract class MultipleAggregateColumnBehaviorBaseTest extends \PHPUnit_Framewor
 
 
     protected abstract function getSchema();
+    protected abstract function shouldBuildSchema();
     protected abstract function getConnection();
 
 
@@ -19,7 +20,7 @@ abstract class MultipleAggregateColumnBehaviorBaseTest extends \PHPUnit_Framewor
     {
         parent::setUp();
 
-        if (!class_exists('AggregatePost')) {
+        if ($this->shouldBuildSchema()) {
             $this->buildSchema($this->getSchema());
         }
 

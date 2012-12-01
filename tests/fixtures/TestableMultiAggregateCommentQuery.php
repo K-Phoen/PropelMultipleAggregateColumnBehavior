@@ -1,10 +1,10 @@
 <?php
 
-class TestableAggregateCommentQuery extends AggregateCommentQuery
+class TestableMultiAggregateCommentQuery extends MultiAggregateCommentQuery
 {
     public static function create($modelAlias = null, $criteria = null)
     {
-        return new TestableAggregateCommentQuery();
+        return new TestableMultiAggregateCommentQuery();
     }
 
     // overrides the parent basePreDelete() to bypass behavior hooks

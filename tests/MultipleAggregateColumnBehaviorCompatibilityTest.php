@@ -6,11 +6,16 @@
  *
  * @author Kévin Gomez <contact@kevingomez.fr>
  */
-class MultipleAggregateColumnBehaviorTest extends MultipleAggregateColumnBehaviorBaseTest
+class MultipleAggregateColumnBehaviorCompatibilityTest extends MultipleAggregateColumnBehaviorBaseTest
 {
     protected function getSchema()
     {
         return file_get_contents(dirname(__FILE__) . '/fixtures/posts-compatibility-schema.xml');
+    }
+
+    protected function shouldBuildSchema()
+    {
+        return !class_exists('AggregatePost');
     }
 
     protected function getConnection()
