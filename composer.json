@@ -1,14 +1,16 @@
 {
     "name": "kphoen/propel-multiple-aggregate-column-behavior",
     "description": "Propel Behavior that allows multiple aggregate columns on a single table",
-    "keywords": [ "propel", "behavior", "multiple-aggregate", "aggregate" ],
+    "keywords": [ "propel", "behavior", "multiple-aggregate", "aggregate", "aggregate-column" ],
+    "license": "MIT",
     "authors": [
         {
             "name": "Nathan Jacobson"
         },
         {
             "name": "Kévin Gomez",
-            "email": "contact@kevingomez.fr"
+            "email": "contact@kevingomez.fr",
+            "homepage": "http://www.kevingomez.fr"
         }
     ],
     "require": {
