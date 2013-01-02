@@ -222,7 +222,22 @@ class MultipleAggregateColumnBehavior extends Behavior
             throw new InvalidArgumentException(sprintf('You must define a foreign key to the \'%s\' table in the \'%s\' table to enable the \'aggregate_column\' behavior', $this->getTable()->getName(), $foreignTable->getName()));
         }
 
-        // FIXME doesn't work when more than one fk to the same table
+        // If we have more than one FK we must define a "foreign_refphpnameX"  parameter on the behaviour for the FK "refPhpName" attribute
+        if(count($fks) > 1) {
+            $refphpname = $this->getAggregateParameter('foreign_refphpname', $x);
+            if(!$refphpname) {
+                throw new InvalidArgumentException(sprintf('You must define a PHP reference name on the \'%s\' behaviour for the \'%s\' table to enable the \'aggregate_column\' behavior', $this->getTable()->getName(), $foreignTable->getName()));
+            }
+            
+            foreach($fks as $fk) {
+                if($fk->getAttribute('refPhpName') == $refphpname) {
+                    return $fk;
+                }
+            }
+            
+            throw new InvalidArgumentException(sprintf('No PHP reference name on the \'%s\' behaviour for the \'%s\' table', $this->getTable()->getName(), $foreignTable->getName()));
+        }
+        
         return array_shift($fks);
     }
 
