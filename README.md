@@ -10,6 +10,12 @@ something not possible with the existing behavior.
 This behaviors aims to be **fully compatible** with the original aggregate_column
 behavior.
 
+## Status
+
+This project is **DEPRECATED** and should NOT be used. 
+
+If someone magically appears and wants to maintain this project, I'll gladly give access to this repository.
+
 ## Working with several aggregates
 
 The syntax is pretty straightforward :
